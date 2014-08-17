@@ -17,7 +17,7 @@ want to contribute to `triton`.
 
 ## Usage
 
-Use Case           | Command
+Action             | Command
 -------------------|-----------------------------------------------------------------------------
 List all Droplets  | `triton list droplets`
 List all SSH Keys  | `triton list keys `
@@ -27,8 +27,8 @@ Delete a Droplet   | `triton droplet delete <name>`
 Transfer an Image  | `triton transfer <image name> <region-slug>`
 
 
-Planned use cases:
-
+Planned actions    | Command
+-------------------|-----------------------------------------------------------------------------
 Power on a Droplet | `triton droplet poweron <name>`
 Shutdown a Droplet | `triton droplet shutdown <name>`
 Reboot a Droplet   | `triton droplet reboot <name>`
