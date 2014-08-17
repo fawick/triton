@@ -124,7 +124,9 @@ func doApiRequest(method, url string, reqData, respData interface{}) error {
 		fmt.Fprintf(os.Stderr, string(b))
 	}
 
-	fmt.Println(response.Status)
+	if options.Verbose {
+		fmt.Println(method, url, "-", response.Status)
+	}
 	if response.StatusCode == 422 {
 		b, _ := json.Marshal(reqData)
 		return fmt.Errorf("Unprocessable Entity: %s", string(b))
@@ -155,7 +157,7 @@ func createDroplet(c *cli.Context) {
 	dc := DropletCreation{Name: c.Args().Get(0), Region: c.String("region"), Size: "512mb", Image: -1}
 	images, err := getImages()
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return
 	}
 	for _, i := range images {
@@ -169,7 +171,7 @@ func createDroplet(c *cli.Context) {
 	}
 	keys, err := getSSHKeys()
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return
 	}
 	// TODO handle no-keys and keys
@@ -181,7 +183,7 @@ func createDroplet(c *cli.Context) {
 	}
 	err = doApiRequest("POST", API_URL+"droplets", dc, &resp)
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return
 	}
 	fmt.Printf("Created droplet %s in region %s with ID %d\n\n", resp.D.Name, resp.D.Region.Name, resp.D.Id)
@@ -289,7 +291,7 @@ func listDroplets(c *cli.Context) {
 	setAppOptions(c)
 	droplets, err := getDroplets()
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return
 	}
 	if len(droplets) == 0 {
@@ -321,7 +323,7 @@ func listImages(c *cli.Context) {
 	setAppOptions(c)
 	images, err := getImages()
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return
 	}
 	if !c.Bool("all") {
@@ -364,7 +366,7 @@ func listSSHKeys(c *cli.Context) {
 	setAppOptions(c)
 	keys, err := getSSHKeys()
 	if err != nil {
-		fmt.Print(err)
+		fmt.Println(err)
 		return
 	}
 	if len(keys) == 0 {
