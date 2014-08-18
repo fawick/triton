@@ -154,25 +154,6 @@ func getDroplets() ([]Droplet, error) {
 	return list.Droplets, nil
 }
 
-func listDroplets(c *cli.Context) {
-	setAppOptions(c)
-	droplets, err := getDroplets()
-	if err != nil {
-		fmt.Println(err)
-		return
-	}
-	if len(droplets) == 0 {
-		fmt.Println("\nNo Droplets available\n")
-		return
-	}
-	fmt.Println("\nAvailable Droplets\n")
-	fmt.Printf("%-10s  %-20s  %-20s  %s\n", "ID", "NAME", "REGION", "STATUS")
-	for _, d := range droplets {
-		fmt.Printf("%-10d  %-20s  %-20s  %s\n", d.Id, d.Name, d.Region.Name, d.Status)
-	}
-	fmt.Println()
-}
-
 func setupDropletCommands() cli.Command {
 	return cli.Command{
 		Name:      "droplet",
