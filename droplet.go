@@ -24,13 +24,21 @@ type DropletActionRequest struct {
 }
 
 type Droplet struct {
-	Id     int    `json:"id"`
-	Name   string `json:"name"`
-	Memory int    `json:"memory"`
-	VCPUs  int    `json:"vcpus"`
-	Disk   int    `json:"disk"`
-	Region Region `json:"region"`
-	Status string `json:"status"`
+	Id       int    `json:"id"`
+	Name     string `json:"name"`
+	Memory   int    `json:"memory"`
+	VCPUs    int    `json:"vcpus"`
+	Disk     int    `json:"disk"`
+	Region   Region `json:"region"`
+	Status   string `json:"status"`
+	Networks struct {
+		IPv4 []struct {
+			Address string `json:"ip_address"`
+		} `json:"v4"`
+		IPv6 []struct {
+			Address string `json:"ip_address"`
+		} `json:"v6"`
+	} `json:"networks"`
 }
 
 func createDroplet(c *cli.Context) {
@@ -127,7 +135,7 @@ func dropletNameToId(dropletName string) (int, error) {
 		}
 	}
 	if dropletId == -1 {
-		return -1, fmt.Errorf("Cannot delete droplet: No droplet '%s' available\n\n", dropletName)
+		return -1, fmt.Errorf("No droplet '%s' available\n\n", dropletName)
 	}
 	return dropletId, nil
 }

@@ -10,6 +10,28 @@ import (
 	"github.com/codegangsta/cli"
 )
 
+type TableWriter struct {
+	*tabwriter.Writer
+	format string
+}
+
+func (t *TableWriter) Header(a ...interface{}) {
+	var h, d []interface{}
+	for _, e := range a {
+		s := fmt.Sprintf("%v", e)
+		t.format += "%v\t"
+		h = append(h, strings.ToUpper(s))
+		d = append(d, "")
+	}
+	t.format += "\n"
+	fmt.Fprintf(t, t.format, h...)
+	fmt.Fprintf(t, t.format, d...)
+}
+
+func (t TableWriter) Line(a ...interface{}) {
+	fmt.Fprintf(t, t.format, a...)
+}
+
 func setupListCommands() cli.Command {
 	return cli.Command{
 		Name:      "list",
@@ -96,28 +118,6 @@ func listImages(c *cli.Context) {
 	fmt.Println()
 }
 
-type TableWriter struct {
-	*tabwriter.Writer
-	format string
-}
-
-func (t *TableWriter) Header(a ...interface{}) {
-	var h, d []interface{}
-	for _, e := range a {
-		s := fmt.Sprintf("%v", e)
-		t.format += "%v\t"
-		h = append(h, strings.ToUpper(s))
-		d = append(d, "")
-	}
-	t.format += "\n"
-	fmt.Fprintf(t, t.format, h...)
-	fmt.Fprintf(t, t.format, d...)
-}
-
-func (t TableWriter) Line(a ...interface{}) {
-	fmt.Fprintf(t, t.format, a...)
-}
-
 var tab = TableWriter{tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0), ""}
 
 func listDroplets(c *cli.Context) {
@@ -132,9 +132,10 @@ func listDroplets(c *cli.Context) {
 		return
 	}
 	fmt.Println("\nAvailable Droplets\n")
-	tab.Header("ID", "Name", "Region", "Status")
+	tab.Header("ID", "Name", "Region", "Status", "IP")
 	for _, d := range droplets {
-		tab.Line(d.Id, d.Name, d.Region.Name, d.Status)
+		tab.Line(d.Id, d.Name, d.Region.Name, d.Status,
+			d.Networks.IPv4[0].Address)
 	}
 	tab.Flush()
 	fmt.Println()
