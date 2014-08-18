@@ -264,6 +264,63 @@ func listSSHKeys(c *cli.Context) {
 	fmt.Println()
 }
 
+func setupListCommands() cli.Command {
+	return cli.Command{
+		Name:      "list",
+		ShortName: "l",
+		Usage:     "List droplets, images, ssh keys",
+		Subcommands: []cli.Command{
+			{
+				Name:      "droplets",
+				ShortName: "d",
+				Usage:     "List all droplets",
+				Action:    listDroplets,
+			},
+			{
+				Name:        "images",
+				ShortName:   "i",
+				Usage:       "List images",
+				Description: "List available system images. By default only private images are shown. Use -a to show all images.",
+				Action:      listImages,
+				Flags: []cli.Flag{
+					cli.BoolFlag{
+						Name:  "all, a",
+						Usage: "Print all images (public and private)",
+					},
+				},
+			},
+			{
+				Name:      "keys",
+				ShortName: "k",
+				Usage:     "List all keys",
+				Action:    listSSHKeys,
+			},
+		},
+	}
+}
+
+func setupImageCommands() cli.Command {
+	return cli.Command{
+		Name:      "image",
+		ShortName: "i",
+		Usage:     "Perform image actions such as transfer.",
+		Subcommands: []cli.Command{
+			{
+				Name:      "list",
+				ShortName: "l",
+				Usage:     "An alias for list images ",
+				Action:    listImages,
+			},
+			{
+				Name:      "transfer",
+				ShortName: "t",
+				Usage:     "Transfer an Image to another region ",
+				Action:    transferImage,
+			},
+		},
+	}
+}
+
 func main() {
 	app := cli.NewApp()
 	app.EnableBashCompletion = true
@@ -287,58 +344,9 @@ func main() {
 		},
 	}
 	app.Commands = []cli.Command{
-		{
-			Name:      "list",
-			ShortName: "l",
-			Usage:     "List droplets, images, ssh keys",
-			Subcommands: []cli.Command{
-				{
-					Name:      "droplets",
-					ShortName: "d",
-					Usage:     "List all droplets",
-					Action:    listDroplets,
-				},
-				{
-					Name:        "images",
-					ShortName:   "i",
-					Usage:       "List images",
-					Description: "List available system images. By default only private images are shown. Use -a to show all images.",
-					Action:      listImages,
-					Flags: []cli.Flag{
-						cli.BoolFlag{
-							Name:  "all, a",
-							Usage: "Print all images (public and private)",
-						},
-					},
-				},
-				{
-					Name:      "keys",
-					ShortName: "k",
-					Usage:     "List all keys",
-					Action:    listSSHKeys,
-				},
-			},
-		},
+		setupListCommands(),
 		setupDropletCommands(),
-		{
-			Name:      "image",
-			ShortName: "i",
-			Usage:     "Perform image actions such as transfer.",
-			Subcommands: []cli.Command{
-				{
-					Name:      "list",
-					ShortName: "l",
-					Usage:     "An alias for list images ",
-					Action:    listImages,
-				},
-				{
-					Name:      "transfer",
-					ShortName: "t",
-					Usage:     "Transfer an Image to another region ",
-					Action:    transferImage,
-				},
-			},
-		},
+		setupImageCommands(),
 	}
 	app.Run(os.Args)
 }
