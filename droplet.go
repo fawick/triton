@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/codegangsta/cli"
@@ -102,7 +103,7 @@ func doDropletAction(id int, a DropletActionRequest) {
 func simpleDropletActionFunc(actionType string) func(*cli.Context) {
 	f := func(c *cli.Context) {
 		setAppOptions(c)
-		dropletId, err := dropletNameToId(c.Args().Get(0))
+		dropletId, err := resolveDropletId(c.Args().Get(0))
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -122,27 +123,33 @@ func deleteDroplet(id int) {
 	fmt.Println("Deleted Droplet with ID", id)
 }
 
-func dropletNameToId(dropletName string) (int, error) {
+func resolveDropletId(dropletString string) (int, error) {
+	// first try to resolve the ID number directly
+	parsedId, err := strconv.ParseInt(dropletString, 10, 64)
+	if err == nil {
+		return int(parsedId), nil
+	}
+	// didn't work, so assume it's a droplet name
 	dropletId := -1
 	droplets, err := getDroplets()
 	if err != nil {
 		return -1, err
 	}
 	for _, d := range droplets {
-		if d.Name == dropletName {
+		if d.Name == dropletString {
 			dropletId = d.Id
 			break
 		}
 	}
 	if dropletId == -1 {
-		return -1, fmt.Errorf("No droplet '%s' available\n\n", dropletName)
+		return -1, fmt.Errorf("No droplet '%s' available\n\n", dropletString)
 	}
 	return dropletId, nil
 }
 
 func deleteDropletByName(c *cli.Context) {
 	setAppOptions(c)
-	dropletId, err := dropletNameToId(c.Args().Get(0))
+	dropletId, err := resolveDropletId(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
 		return

@@ -132,7 +132,7 @@ func listDroplets(c *cli.Context) {
 		return
 	}
 	fmt.Println("\nAvailable Droplets\n")
-	tab.Header("ID", "Name", "Region", "Status", "IP")
+	tab.Header("ID", "Name", "Region", "Status", "IP Address")
 	for _, d := range droplets {
 		tab.Line(d.Id, d.Name, d.Region.Name, d.Status,
 			d.Networks.IPv4[0].Address)
