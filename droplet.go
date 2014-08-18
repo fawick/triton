@@ -82,13 +82,27 @@ func doDropletAction(id int, a DropletActionRequest) {
 	var resp struct {
 		A Action `json:"action"`
 	}
-	url := API_URL + fmt.Sprintf("droplets/%d/actions")
+	url := API_URL + fmt.Sprintf("droplets/%d/actions", id)
 	err := doApiPost(url, a, &resp)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	fmt.Println(resp.A.String())
+}
+
+func simpleDropletActionFunc(actionType string) func(*cli.Context) {
+	f := func(c *cli.Context) {
+		setAppOptions(c)
+		dropletId, err := dropletNameToId(c.Args().Get(0))
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		a := DropletActionRequest{Type: actionType}
+		doDropletAction(dropletId, a)
+	}
+	return f
 }
 
 func deleteDroplet(id int) {
@@ -100,14 +114,11 @@ func deleteDroplet(id int) {
 	fmt.Println("Deleted Droplet with ID", id)
 }
 
-func deleteDropletByName(c *cli.Context) {
-	setAppOptions(c)
-	dropletName := c.Args().Get(0)
+func dropletNameToId(dropletName string) (int, error) {
 	dropletId := -1
 	droplets, err := getDroplets()
 	if err != nil {
-		fmt.Println(err)
-		return
+		return -1, err
 	}
 	for _, d := range droplets {
 		if d.Name == dropletName {
@@ -116,7 +127,16 @@ func deleteDropletByName(c *cli.Context) {
 		}
 	}
 	if dropletId == -1 {
-		fmt.Printf("Cannot delete drople: No droplet '%s' available\n\n", dropletName)
+		return -1, fmt.Errorf("Cannot delete droplet: No droplet '%s' available\n\n", dropletName)
+	}
+	return dropletId, nil
+}
+
+func deleteDropletByName(c *cli.Context) {
+	setAppOptions(c)
+	dropletId, err := dropletNameToId(c.Args().Get(0))
+	if err != nil {
+		fmt.Println(err)
 		return
 	}
 	deleteDroplet(dropletId)
@@ -151,4 +171,100 @@ func listDroplets(c *cli.Context) {
 		fmt.Printf("%-10d  %-20s  %-20s  %s\n", d.Id, d.Name, d.Region.Name, d.Status)
 	}
 	fmt.Println()
+}
+
+func setupDropletCommands() cli.Command {
+	return cli.Command{
+		Name:      "droplet",
+		ShortName: "d",
+		Usage:     "Create, modify or destroy applets.",
+		Subcommands: []cli.Command{
+			{
+				Name:      "list",
+				ShortName: "l",
+				Usage:     "An alias for list droplets ",
+				Action:    listDroplets,
+			},
+			{
+				Name:      "create",
+				ShortName: "c",
+				Usage:     "Create a Droplet from a Image",
+				Description: "A droplet is created from a specific Image. If a region is specified, it will be " +
+					"created in this region. Otherwise the default region will be used. By default, all " +
+					"available SSH Keys will be embedded in the image. Use either --no-keys or " +
+					"--keys=keyname1[,keyname2[,...]] to change that.",
+				Action: createDroplet,
+				Flags: []cli.Flag{
+					cli.StringFlag{
+						Name:  "region, r",
+						Usage: fmt.Sprintf("Which region to create the Droplet in. [%s]", DEFAULT_REGION),
+						Value: DEFAULT_REGION,
+					},
+					cli.BoolFlag{
+						Name:  "no-keys",
+						Usage: "Do not set up any SSH keys in the Droplet",
+					},
+					cli.StringSliceFlag{
+						Name:  "keys",
+						Value: &cli.StringSlice{},
+						Usage: "Comma-separated lists of SSH Key names to set up (cf. 'list keys')",
+					},
+				},
+			},
+			{
+				Name:      "delete",
+				ShortName: "d",
+				Usage:     "Destroy and delete a Droplet",
+				Action:    deleteDropletByName,
+			},
+			{
+				Name:      "poweron",
+				ShortName: "p",
+				Usage:     "Power on a Droplet",
+				Action:    simpleDropletActionFunc("power_on"),
+			},
+			{
+				Name:   "poweroff",
+				Usage:  "Power off a Droplet",
+				Action: simpleDropletActionFunc("power_off"),
+			},
+			{
+				Name:      "shutdown",
+				ShortName: "s",
+				Usage:     "Shutdown a Droplet",
+				Action:    simpleDropletActionFunc("shutdown"),
+			},
+			{
+				Name:      "reboot",
+				ShortName: "r",
+				Usage:     "Reboot a Droplet",
+				Action:    simpleDropletActionFunc("reboot"),
+			},
+			{
+				Name:   "powercycle",
+				Usage:  "Power off and on a Droplet",
+				Action: simpleDropletActionFunc("power_cycle"),
+			},
+			{
+				Name:   "passwordreset",
+				Usage:  "Reset the root password for a Droplet",
+				Action: simpleDropletActionFunc("password_reset"),
+			},
+			{
+				Name:   "ipv6",
+				Usage:  "Enable IPv6 for a Droplet",
+				Action: simpleDropletActionFunc("enable_ipv6"),
+			},
+			{
+				Name:   "disablebackups",
+				Usage:  "Disable backups for a Droplet",
+				Action: simpleDropletActionFunc("disable_backups"),
+			},
+			{
+				Name:   "privatenetworking",
+				Usage:  "Enable private for a Droplet",
+				Action: simpleDropletActionFunc("enable_private_networking"),
+			},
+		},
+	}
 }

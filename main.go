@@ -36,7 +36,7 @@ type Action struct {
 }
 
 func (a Action) String() string {
-	return fmt.Sprintf("Started %s for %s %d (Region %s): %s\n",
+	return fmt.Sprintf("%s for %s %d (Region %s): %s\n",
 		a.Type, a.ResourceType, a.ResourceID, a.Region, a.Status)
 }
 
@@ -319,51 +319,7 @@ func main() {
 				},
 			},
 		},
-		{
-			Name:      "droplet",
-			ShortName: "d",
-			Usage:     "Create, modify or destroy applets.",
-			Subcommands: []cli.Command{
-				{
-					Name:      "list",
-					ShortName: "l",
-					Usage:     "An alias for list droplets ",
-					Action:    listDroplets,
-				},
-				{
-					Name:      "create",
-					ShortName: "c",
-					Usage:     "Create a Droplet from a Image",
-					Description: "A droplet is created from a specific Image. If a region is specified, it will be " +
-						"created in this region. Otherwise the default region will be used. By default, all " +
-						"available SSH Keys will be embedded in the image. Use either --no-keys or " +
-						"--keys=keyname1[,keyname2[,...]] to change that.",
-					Action: createDroplet,
-					Flags: []cli.Flag{
-						cli.StringFlag{
-							Name:  "region, r",
-							Usage: fmt.Sprintf("Which region to create the Droplet in. [%s]", DEFAULT_REGION),
-							Value: DEFAULT_REGION,
-						},
-						cli.BoolFlag{
-							Name:  "no-keys",
-							Usage: "Do not set up any SSH keys in the Droplet",
-						},
-						cli.StringSliceFlag{
-							Name:  "keys",
-							Value: &cli.StringSlice{},
-							Usage: "Comma-separated lists of SSH Key names to set up (cf. 'list keys')",
-						},
-					},
-				},
-				{
-					Name:      "delete",
-					ShortName: "d",
-					Usage:     "Destroy and delete a Droplet",
-					Action:    deleteDropletByName,
-				},
-			},
-		},
+		setupDropletCommands(),
 		{
 			Name:      "image",
 			ShortName: "i",

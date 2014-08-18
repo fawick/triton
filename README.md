@@ -20,20 +20,26 @@ want to contribute to `triton`.
 Set the authentication token via environment variable `$DIGITALOCEAN_API_TOKEN`
 or via global option `--token`.
 
-Action             | Command
--------------------|-----------------------------------------------------------------------------
-List all Droplets  | `triton list droplets`
-List all SSH Keys  | `triton list keys `
-List all Images    | `triton list images`
-Create a Droplet   | `triton droplet create <name> <image> [-region=<region slug>] [--keys=keyid1,keyid2]`
-Delete a Droplet   | `triton droplet delete <name>`
-Transfer an Image  | `triton transfer <image name> <region-slug>`
+Action              | Command
+--------------------|-----------------------------------------------------------------------------
+List all Droplets   | `triton list droplets`
+List all SSH Keys   | `triton list keys `
+List all Images     | `triton list images`
+Create a Droplet    | `triton droplet create <name> <image> [-region=<region slug>] [--keys=keyid1,keyid2]`
+Delete a Droplet    | `triton droplet delete <name>`
+Power on a Droplet  | `triton droplet poweron <name>`
+Power off a Droplet | `triton droplet poweroff <name>`
+Shutdown a Droplet  | `triton droplet shutdown <name>`
+Reboot a Droplet    | `triton droplet reboot <name>`
+Power off and on    | `triton droplet powercycle <name>`
+Password reset      | `triton droplet passwordreset <name>`
+Enable IPv6         | `triton droplet ipv6 <name>`
+Disable backups     | `triton droplet disablebackups <name>`
+Private networking  | `triton droplet privatenetworking <name>`
+Transfer an Image   | `triton transfer <image name> <region-slug>`
 
 
 Planned actions    | Command
 -------------------|-----------------------------------------------------------------------------
-Power on a Droplet | `triton droplet poweron <name>`
-Shutdown a Droplet | `triton droplet shutdown <name>`
-Reboot a Droplet   | `triton droplet reboot <name>`
 Create an Image    | `triton image snapshot <droplet name> <image name>`
 
