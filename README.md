@@ -17,6 +17,9 @@ want to contribute to `triton`.
 
 ## Usage
 
+Set the authentication token via environment variable `$DIGITALOCEAN_API_TOKEN`
+or via global option `--token`.
+
 Action             | Command
 -------------------|-----------------------------------------------------------------------------
 List all Droplets  | `triton list droplets`
