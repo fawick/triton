@@ -2,6 +2,9 @@ package main
 
 import (
 	"fmt"
+	"os"
+	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/codegangsta/cli"
@@ -53,10 +56,12 @@ func listSSHKeys(c *cli.Context) {
 		fmt.Println("\nNo Keys available\n")
 		return
 	}
-	fmt.Println("\nAvailable SSH Keys\n\nID\tNAME\n")
+	fmt.Println("\nAvailable SSH Keys\n")
+	tab.Header("ID", "Name")
 	for _, k := range keys {
-		fmt.Printf("%d\t%s\n", k.Id, k.Name)
+		tab.Line(k.Id, k.Name)
 	}
+	tab.Flush()
 	fmt.Println()
 }
 
@@ -81,14 +86,39 @@ func listImages(c *cli.Context) {
 		return
 	}
 	fmt.Println("\nAvailable Images\n")
-	fmt.Printf("%-10s  %-25s  %-20s  %s\n\n", "ID", "NAME", "CREATION", "REGIONS")
+	tab.Header("ID", "Name", "Creation", "Regions")
 	for _, i := range images {
 		t, _ := time.Parse(time.RFC3339, i.CreatedAt)
 		s := t.Format(time.RFC822)
-		fmt.Printf("%-10d  %-25s  %-20s  %s\n", i.Id, i.Name, s, i.Regions)
+		tab.Line(i.Id, i.Name, s, i.Regions)
 	}
+	tab.Flush()
 	fmt.Println()
 }
+
+type TableWriter struct {
+	*tabwriter.Writer
+	format string
+}
+
+func (t *TableWriter) Header(a ...interface{}) {
+	var h, d []interface{}
+	for _, e := range a {
+		s := fmt.Sprintf("%v", e)
+		t.format += "%v\t"
+		h = append(h, strings.ToUpper(s))
+		d = append(d, "")
+	}
+	t.format += "\n"
+	fmt.Fprintf(t, t.format, h...)
+	fmt.Fprintf(t, t.format, d...)
+}
+
+func (t TableWriter) Line(a ...interface{}) {
+	fmt.Fprintf(t, t.format, a...)
+}
+
+var tab = TableWriter{tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0), ""}
 
 func listDroplets(c *cli.Context) {
 	setAppOptions(c)
@@ -102,9 +132,10 @@ func listDroplets(c *cli.Context) {
 		return
 	}
 	fmt.Println("\nAvailable Droplets\n")
-	fmt.Printf("%-10s  %-20s  %-20s  %s\n", "ID", "NAME", "REGION", "STATUS")
+	tab.Header("ID", "Name", "Region", "Status")
 	for _, d := range droplets {
-		fmt.Printf("%-10d  %-20s  %-20s  %s\n", d.Id, d.Name, d.Region.Name, d.Status)
+		tab.Line(d.Id, d.Name, d.Region.Name, d.Status)
 	}
+	tab.Flush()
 	fmt.Println()
 }
