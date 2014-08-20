@@ -75,6 +75,21 @@ func resolveImageId(imageString string) (int, error) {
 	return imageId, nil
 }
 
+func deleteImage(c *cli.Context) {
+	setAppOptions(c)
+	imageId, err := resolveImageId(c.Args().Get(0))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	err = doApiDelete(API_URL + fmt.Sprintf("images/%d", imageId))
+	if err != nil {
+		fmt.Println("Error while deleting image:", err)
+		return
+	}
+	fmt.Println("Delete Image with ID", imageId)
+}
+
 func setupImageCommands() cli.Command {
 	return cli.Command{
 		Name:      "image",
@@ -92,6 +107,12 @@ func setupImageCommands() cli.Command {
 				ShortName: "t",
 				Usage:     "Transfer an Image to another region ",
 				Action:    transferImage,
+			},
+			{
+				Name:      "delete",
+				ShortName: "d",
+				Usage:     "Destroy and delete an image",
+				Action:    deleteImage,
 			},
 		},
 	}

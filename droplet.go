@@ -125,15 +125,6 @@ func createDropletSnapshot(c *cli.Context) {
 	doDropletAction(dropletId, a)
 }
 
-func deleteDroplet(id int) {
-	err := doApiDelete(API_URL + fmt.Sprintf("droplets/%d", id))
-	if err != nil {
-		fmt.Println("Error while deleting droplet:", err)
-		return
-	}
-	fmt.Println("Deleted Droplet with ID", id)
-}
-
 func resolveDropletId(dropletString string) (int, error) {
 	// first try to resolve the ID number directly
 	parsedId, err := strconv.ParseInt(dropletString, 10, 64)
@@ -158,14 +149,19 @@ func resolveDropletId(dropletString string) (int, error) {
 	return dropletId, nil
 }
 
-func deleteDropletByName(c *cli.Context) {
+func deleteDroplet(c *cli.Context) {
 	setAppOptions(c)
 	dropletId, err := resolveDropletId(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	deleteDroplet(dropletId)
+	err = doApiDelete(API_URL + fmt.Sprintf("droplets/%d", dropletId))
+	if err != nil {
+		fmt.Println("Error while deleting droplet:", err)
+		return
+	}
+	fmt.Println("Deleted Droplet with ID", dropletId)
 }
 
 func getDroplets() ([]Droplet, error) {
@@ -222,7 +218,7 @@ func setupDropletCommands() cli.Command {
 				Name:      "delete",
 				ShortName: "d",
 				Usage:     "Destroy and delete a Droplet",
-				Action:    deleteDropletByName,
+				Action:    deleteDroplet,
 			},
 			{
 				Name:      "poweron",
