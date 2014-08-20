@@ -114,6 +114,21 @@ func simpleDropletActionFunc(actionType string) func(*cli.Context) {
 	return f
 }
 
+func createDropletSnapshot(c *cli.Context) {
+	setAppOptions(c)
+	if len(c.Args()) != 2 {
+		fmt.Println("Need exact two arguments: create <droplet name or id> <image name>")
+		return
+	}
+	dropletId, err := resolveDropletId(c.Args().Get(0))
+	if err != nil {
+		fmt.Println(err)
+		return
+	}
+	a := DropletActionRequest{Type: "snapshot", Name: c.Args().Get(1)}
+	doDropletAction(dropletId, a)
+}
+
 func deleteDroplet(id int) {
 	err := doApiDelete(API_URL + fmt.Sprintf("droplets/%d", id))
 	if err != nil {
@@ -184,7 +199,7 @@ func setupDropletCommands() cli.Command {
 			{
 				Name:      "create",
 				ShortName: "c",
-				Usage:     "Create a Droplet from a Image",
+				Usage:     "Create a Droplet from a Image: create <droplet name> <image name or id>",
 				Description: "A droplet is created from a specific Image. If a region is specified, it will be " +
 					"created in this region. Otherwise the default region will be used. By default, all " +
 					"available SSH Keys will be embedded in the image. Use either --no-keys or " +
@@ -260,6 +275,12 @@ func setupDropletCommands() cli.Command {
 				Name:   "privatenetworking",
 				Usage:  "Enable private for a Droplet",
 				Action: simpleDropletActionFunc("enable_private_networking"),
+			},
+			{
+				Name:      "snapshot",
+				ShortName: "n",
+				Usage:     "Create a snapshot image for the Droplet",
+				Action:    createDropletSnapshot,
 			},
 		},
 	}
