@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strconv"
 
 	"github.com/codegangsta/cli"
 )
@@ -33,20 +34,9 @@ func getImages() ([]Image, error) {
 func transferImage(c *cli.Context) {
 	setAppOptions(c)
 	it := ImageTransfer{"transfer", c.Args().Get(1)}
-	imageId := -1
-	images, err := getImages()
+	imageId, err := resolveImageId(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
-		return
-	}
-	for _, i := range images {
-		if i.Name == c.Args().Get(0) {
-			imageId = i.Id
-			break
-		}
-	}
-	if imageId == -1 {
-		fmt.Printf("Cannot transfer image: No image '%s' available\n\n", c.Args().Get(0))
 		return
 	}
 	var resp struct {
@@ -61,17 +51,28 @@ func transferImage(c *cli.Context) {
 	fmt.Println(resp.A.String())
 }
 
-func ImageByName(name string) (int, error) {
+func resolveImageId(imageString string) (int, error) {
+	// first try to resolve the ID number directly
+	parsedId, err := strconv.ParseInt(imageString, 10, 64)
+	if err == nil {
+		return int(parsedId), nil
+	}
+	// didn't work, so assume it's a droplet name
+	imageId := -1
 	images, err := getImages()
 	if err != nil {
 		return -1, err
 	}
 	for _, i := range images {
-		if i.Name == name {
-			return i.Id, nil
+		if i.Name == imageString {
+			imageId = i.Id
+			break
 		}
 	}
-	return -1, fmt.Errorf("No image with name %s available", name)
+	if imageId == -1 {
+		return -1, fmt.Errorf("No image %s available", imageString)
+	}
+	return imageId, nil
 }
 
 func setupImageCommands() cli.Command {

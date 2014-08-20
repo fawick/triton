@@ -53,15 +53,11 @@ func createDroplet(c *cli.Context) {
 		return
 	}
 	dc := DropletCreation{Name: c.Args().Get(0), Region: c.String("region"), Size: "512mb", Image: -1}
-	images, err := getImages()
+	var err error
+	dc.Image, err = resolveImageId(c.Args().Get(1))
 	if err != nil {
 		fmt.Println(err)
 		return
-	}
-	for _, i := range images {
-		if i.Name == c.Args().Get(1) {
-			dc.Image = i.Id
-		}
 	}
 	if dc.Image == -1 {
 		fmt.Printf("Cannot create droplet: No image '%s' available\n\n", c.Args().Get(1))
