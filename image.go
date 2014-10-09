@@ -32,7 +32,6 @@ func getImages() ([]Image, error) {
 }
 
 func transferImage(c *cli.Context) {
-	setAppOptions(c)
 	it := ImageTransfer{"transfer", c.Args().Get(1)}
 	imageId, err := resolveImageId(c.Args().Get(0))
 	if err != nil {
@@ -76,7 +75,6 @@ func resolveImageId(imageString string) (int, error) {
 }
 
 func deleteImage(c *cli.Context) {
-	setAppOptions(c)
 	imageId, err := resolveImageId(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
@@ -100,19 +98,19 @@ func setupImageCommands() cli.Command {
 				Name:      "list",
 				ShortName: "l",
 				Usage:     "An alias for list images ",
-				Action:    listImages,
+				Action:    wrapAction(listImages),
 			},
 			{
 				Name:      "transfer",
 				ShortName: "t",
 				Usage:     "Transfer an Image to another region ",
-				Action:    transferImage,
+				Action:    wrapAction(transferImage),
 			},
 			{
 				Name:      "delete",
 				ShortName: "d",
 				Usage:     "Destroy and delete an image",
-				Action:    deleteImage,
+				Action:    wrapAction(deleteImage),
 			},
 		},
 	}

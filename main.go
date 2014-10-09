@@ -147,6 +147,13 @@ func SSHKeyByName(name string) (int, error) {
 	return -1, fmt.Errorf("No key with name %s available", name)
 }
 
+func wrapAction(f func(*cli.Context)) func(*cli.Context) {
+	return func(c *cli.Context) {
+		setAppOptions(c)
+		f(c)
+	}
+}
+
 func main() {
 	app := cli.NewApp()
 	app.EnableBashCompletion = true

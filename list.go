@@ -42,14 +42,14 @@ func setupListCommands() cli.Command {
 				Name:      "droplets",
 				ShortName: "d",
 				Usage:     "List all droplets",
-				Action:    listDroplets,
+				Action:    wrapAction(listDroplets),
 			},
 			{
 				Name:        "images",
 				ShortName:   "i",
 				Usage:       "List images",
 				Description: "List available system images. By default only private images are shown. Use -a to show all images.",
-				Action:      listImages,
+				Action:      wrapAction(listImages),
 				Flags: []cli.Flag{
 					cli.BoolFlag{
 						Name:  "all, a",
@@ -61,14 +61,13 @@ func setupListCommands() cli.Command {
 				Name:      "keys",
 				ShortName: "k",
 				Usage:     "List all keys",
-				Action:    listSSHKeys,
+				Action:    wrapAction(listSSHKeys),
 			},
 		},
 	}
 }
 
 func listSSHKeys(c *cli.Context) {
-	setAppOptions(c)
 	keys, err := getSSHKeys()
 	if err != nil {
 		fmt.Println(err)
@@ -88,7 +87,6 @@ func listSSHKeys(c *cli.Context) {
 }
 
 func listImages(c *cli.Context) {
-	setAppOptions(c)
 	images, err := getImages()
 	if err != nil {
 		fmt.Println(err)
@@ -121,7 +119,6 @@ func listImages(c *cli.Context) {
 var tab = TableWriter{tabwriter.NewWriter(os.Stdout, 0, 8, 2, ' ', 0), ""}
 
 func listDroplets(c *cli.Context) {
-	setAppOptions(c)
 	droplets, err := getDroplets()
 	if err != nil {
 		fmt.Println(err)

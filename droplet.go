@@ -43,7 +43,6 @@ type Droplet struct {
 }
 
 func createDroplet(c *cli.Context) {
-	setAppOptions(c)
 	if len(c.Args()) != 2 {
 		fmt.Println("Error with arguments:", c.Args(), "\n")
 		tmpl := cli.CommandHelpTemplate
@@ -98,7 +97,6 @@ func doDropletAction(id int, a DropletActionRequest) {
 
 func simpleDropletActionFunc(actionType string) func(*cli.Context) {
 	f := func(c *cli.Context) {
-		setAppOptions(c)
 		dropletId, err := resolveDropletId(c.Args().Get(0))
 		if err != nil {
 			fmt.Println(err)
@@ -111,7 +109,6 @@ func simpleDropletActionFunc(actionType string) func(*cli.Context) {
 }
 
 func createDropletSnapshot(c *cli.Context) {
-	setAppOptions(c)
 	if len(c.Args()) != 2 {
 		fmt.Println("Need exact two arguments: create <droplet name or id> <image name>")
 		return
@@ -150,7 +147,6 @@ func resolveDropletId(dropletString string) (int, error) {
 }
 
 func deleteDroplet(c *cli.Context) {
-	setAppOptions(c)
 	dropletId, err := resolveDropletId(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
@@ -186,7 +182,7 @@ func setupDropletCommands() cli.Command {
 				Name:      "list",
 				ShortName: "l",
 				Usage:     "An alias for list droplets ",
-				Action:    listDroplets,
+				Action:    wrapAction(listDroplets),
 			},
 			{
 				Name:      "create",
@@ -196,7 +192,7 @@ func setupDropletCommands() cli.Command {
 					"created in this region. Otherwise the default region will be used. By default, all " +
 					"available SSH Keys will be embedded in the image. Use either --no-keys or " +
 					"--keys=keyname1[,keyname2[,...]] to change that.",
-				Action: createDroplet,
+				Action: wrapAction(createDroplet),
 				Flags: []cli.Flag{
 					cli.StringFlag{
 						Name:  "region, r",
@@ -218,61 +214,61 @@ func setupDropletCommands() cli.Command {
 				Name:      "delete",
 				ShortName: "d",
 				Usage:     "Destroy and delete a Droplet",
-				Action:    deleteDroplet,
+				Action:    wrapAction(deleteDroplet),
 			},
 			{
 				Name:      "poweron",
 				ShortName: "p",
 				Usage:     "Power on a Droplet",
-				Action:    simpleDropletActionFunc("power_on"),
+				Action:    wrapAction(simpleDropletActionFunc("power_on")),
 			},
 			{
 				Name:   "poweroff",
 				Usage:  "Power off a Droplet",
-				Action: simpleDropletActionFunc("power_off"),
+				Action: wrapAction(simpleDropletActionFunc("power_off")),
 			},
 			{
 				Name:      "shutdown",
 				ShortName: "s",
 				Usage:     "Shutdown a Droplet",
-				Action:    simpleDropletActionFunc("shutdown"),
+				Action:    wrapAction(simpleDropletActionFunc("shutdown")),
 			},
 			{
 				Name:      "reboot",
 				ShortName: "r",
 				Usage:     "Reboot a Droplet",
-				Action:    simpleDropletActionFunc("reboot"),
+				Action:    wrapAction(simpleDropletActionFunc("reboot")),
 			},
 			{
 				Name:   "powercycle",
 				Usage:  "Power off and on a Droplet",
-				Action: simpleDropletActionFunc("power_cycle"),
+				Action: wrapAction(simpleDropletActionFunc("power_cycle")),
 			},
 			{
 				Name:   "passwordreset",
 				Usage:  "Reset the root password for a Droplet",
-				Action: simpleDropletActionFunc("password_reset"),
+				Action: wrapAction(simpleDropletActionFunc("password_reset")),
 			},
 			{
 				Name:   "ipv6",
 				Usage:  "Enable IPv6 for a Droplet",
-				Action: simpleDropletActionFunc("enable_ipv6"),
+				Action: wrapAction(simpleDropletActionFunc("enable_ipv6")),
 			},
 			{
 				Name:   "disablebackups",
 				Usage:  "Disable backups for a Droplet",
-				Action: simpleDropletActionFunc("disable_backups"),
+				Action: wrapAction(simpleDropletActionFunc("disable_backups")),
 			},
 			{
 				Name:   "privatenetworking",
 				Usage:  "Enable private for a Droplet",
-				Action: simpleDropletActionFunc("enable_private_networking"),
+				Action: wrapAction(simpleDropletActionFunc("enable_private_networking")),
 			},
 			{
 				Name:      "snapshot",
 				ShortName: "n",
 				Usage:     "Create a snapshot image for the Droplet",
-				Action:    createDropletSnapshot,
+				Action:    wrapAction(createDropletSnapshot),
 			},
 		},
 	}
