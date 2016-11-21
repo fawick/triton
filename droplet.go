@@ -25,7 +25,7 @@ type DropletActionRequest struct {
 }
 
 type Droplet struct {
-	Id       int    `json:"id"`
+	ID       int    `json:"id"`
 	Name     string `json:"name"`
 	Memory   int    `json:"memory"`
 	VCPUs    int    `json:"vcpus"`
@@ -44,7 +44,7 @@ type Droplet struct {
 
 func createDroplet(c *cli.Context) {
 	if len(c.Args()) != 2 {
-		fmt.Println("Error with arguments:", c.Args(), "\n")
+		fmt.Println("Error with arguments:", c.Args())
 		tmpl := cli.CommandHelpTemplate
 		cli.CommandHelpTemplate = strings.Replace(cli.CommandHelpTemplate, "[arguments...]", "<Droplet name> <Image>", -1)
 		cli.ShowCommandHelp(c, "create")
@@ -53,7 +53,7 @@ func createDroplet(c *cli.Context) {
 	}
 	dc := DropletCreation{Name: c.Args().Get(0), Region: c.String("region"), Size: "512mb", Image: -1}
 	var err error
-	dc.Image, err = resolveImageId(c.Args().Get(1))
+	dc.Image, err = resolveImageID(c.Args().Get(1))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -69,25 +69,25 @@ func createDroplet(c *cli.Context) {
 	}
 	// TODO handle no-keys and keys
 	for _, k := range keys {
-		dc.SSHKeyIds = append(dc.SSHKeyIds, k.Id)
+		dc.SSHKeyIds = append(dc.SSHKeyIds, k.ID)
 	}
 	var resp struct {
 		D Droplet `json:"droplet"`
 	}
-	err = doApiPost(API_URL+"droplets", dc, &resp)
+	err = doAPIPost(APIURL+"droplets", dc, &resp)
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	fmt.Printf("Created droplet %s in region %s with ID %d\n\n", resp.D.Name, resp.D.Region.Name, resp.D.Id)
+	fmt.Printf("Created droplet %s in region %s with ID %d\n\n", resp.D.Name, resp.D.Region.Name, resp.D.ID)
 }
 
 func doDropletAction(id int, a DropletActionRequest) {
 	var resp struct {
 		A Action `json:"action"`
 	}
-	url := API_URL + fmt.Sprintf("droplets/%d/actions", id)
-	err := doApiPost(url, a, &resp)
+	url := APIURL + fmt.Sprintf("droplets/%d/actions", id)
+	err := doAPIPost(url, a, &resp)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -97,13 +97,13 @@ func doDropletAction(id int, a DropletActionRequest) {
 
 func simpleDropletActionFunc(actionType string) func(*cli.Context) {
 	f := func(c *cli.Context) {
-		dropletId, err := resolveDropletId(c.Args().Get(0))
+		dropletID, err := resolveDropletID(c.Args().Get(0))
 		if err != nil {
 			fmt.Println(err)
 			return
 		}
 		a := DropletActionRequest{Type: actionType}
-		doDropletAction(dropletId, a)
+		doDropletAction(dropletID, a)
 	}
 	return f
 }
@@ -113,59 +113,59 @@ func createDropletSnapshot(c *cli.Context) {
 		fmt.Println("Need exact two arguments: create <droplet name or id> <image name>")
 		return
 	}
-	dropletId, err := resolveDropletId(c.Args().Get(0))
+	dropletID, err := resolveDropletID(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 	a := DropletActionRequest{Type: "snapshot", Name: c.Args().Get(1)}
-	doDropletAction(dropletId, a)
+	doDropletAction(dropletID, a)
 }
 
-func resolveDropletId(dropletString string) (int, error) {
+func resolveDropletID(dropletString string) (int, error) {
 	// first try to resolve the ID number directly
-	parsedId, err := strconv.ParseInt(dropletString, 10, 64)
+	parsedID, err := strconv.ParseInt(dropletString, 10, 64)
 	if err == nil {
-		return int(parsedId), nil
+		return int(parsedID), nil
 	}
 	// didn't work, so assume it's a droplet name
-	dropletId := -1
+	dropletID := -1
 	droplets, err := getDroplets()
 	if err != nil {
 		return -1, err
 	}
 	for _, d := range droplets {
 		if d.Name == dropletString {
-			dropletId = d.Id
+			dropletID = d.ID
 			break
 		}
 	}
-	if dropletId == -1 {
+	if dropletID == -1 {
 		return -1, fmt.Errorf("No droplet '%s' available\n\n", dropletString)
 	}
-	return dropletId, nil
+	return dropletID, nil
 }
 
 func deleteDroplet(c *cli.Context) {
-	dropletId, err := resolveDropletId(c.Args().Get(0))
+	dropletID, err := resolveDropletID(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	err = doApiDelete(API_URL + fmt.Sprintf("droplets/%d", dropletId))
+	err = doAPIDelete(APIURL + fmt.Sprintf("droplets/%d", dropletID))
 	if err != nil {
 		fmt.Println("Error while deleting droplet:", err)
 		return
 	}
-	fmt.Println("Deleted Droplet with ID", dropletId)
+	fmt.Println("Deleted Droplet with ID", dropletID)
 }
 
 func getDroplets() ([]Droplet, error) {
 	var list struct {
 		Droplets []Droplet `json:"droplets"`
 	}
-	url := API_URL + "droplets"
-	err := doApiGet(url, &list)
+	url := APIURL + "droplets"
+	err := doAPIGet(url, &list)
 	if err != nil {
 		return nil, err
 	}
@@ -196,8 +196,8 @@ func setupDropletCommands() cli.Command {
 				Flags: []cli.Flag{
 					cli.StringFlag{
 						Name:  "region, r",
-						Usage: fmt.Sprintf("Which region to create the Droplet in. [%s]", DEFAULT_REGION),
-						Value: DEFAULT_REGION,
+						Usage: fmt.Sprintf("Which region to create the Droplet in. [%s]", DefaultRegion),
+						Value: DefaultRegion,
 					},
 					cli.BoolFlag{
 						Name:  "no-keys",

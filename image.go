@@ -13,7 +13,7 @@ type ImageTransfer struct {
 }
 
 type Image struct {
-	Id        int      `json:"id"`
+	ID        int      `json:"id"`
 	Name      string   `json:"name"`
 	Regions   []string `json:"regions"`
 	Public    bool     `json:"public"`
@@ -24,7 +24,7 @@ func getImages() ([]Image, error) {
 	var list struct {
 		Images []Image `json:"images"`
 	}
-	err := doApiGet(API_URL+"images", &list)
+	err := doAPIGet(APIURL+"images", &list)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +33,7 @@ func getImages() ([]Image, error) {
 
 func transferImage(c *cli.Context) {
 	it := ImageTransfer{"transfer", c.Args().Get(1)}
-	imageId, err := resolveImageId(c.Args().Get(0))
+	imageID, err := resolveImageID(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -41,8 +41,8 @@ func transferImage(c *cli.Context) {
 	var resp struct {
 		A Action `json:"action"`
 	}
-	url := API_URL + fmt.Sprintf("images/%d/actions", imageId)
-	err = doApiPost(url, it, &resp)
+	url := APIURL + fmt.Sprintf("images/%d/actions", imageID)
+	err = doAPIPost(url, it, &resp)
 	if err != nil {
 		fmt.Println(err)
 		return
@@ -50,42 +50,42 @@ func transferImage(c *cli.Context) {
 	fmt.Println(resp.A.String())
 }
 
-func resolveImageId(imageString string) (int, error) {
+func resolveImageID(imageString string) (int, error) {
 	// first try to resolve the ID number directly
-	parsedId, err := strconv.ParseInt(imageString, 10, 64)
+	parsedID, err := strconv.ParseInt(imageString, 10, 64)
 	if err == nil {
-		return int(parsedId), nil
+		return int(parsedID), nil
 	}
 	// didn't work, so assume it's a droplet name
-	imageId := -1
+	imageID := -1
 	images, err := getImages()
 	if err != nil {
 		return -1, err
 	}
 	for _, i := range images {
 		if i.Name == imageString {
-			imageId = i.Id
+			imageID = i.ID
 			break
 		}
 	}
-	if imageId == -1 {
+	if imageID == -1 {
 		return -1, fmt.Errorf("No image %s available", imageString)
 	}
-	return imageId, nil
+	return imageID, nil
 }
 
 func deleteImage(c *cli.Context) {
-	imageId, err := resolveImageId(c.Args().Get(0))
+	imageID, err := resolveImageID(c.Args().Get(0))
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
-	err = doApiDelete(API_URL + fmt.Sprintf("images/%d", imageId))
+	err = doAPIDelete(APIURL + fmt.Sprintf("images/%d", imageID))
 	if err != nil {
 		fmt.Println("Error while deleting image:", err)
 		return
 	}
-	fmt.Println("Delete Image with ID", imageId)
+	fmt.Println("Delete Image with ID", imageID)
 }
 
 func setupImageCommands() cli.Command {

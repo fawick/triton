@@ -26,7 +26,7 @@ func setAppOptions(c *cli.Context) {
 }
 
 type Action struct {
-	Id           int    `json:"id"`
+	ID           int    `json:"id"`
 	Status       string `json:"status"`
 	Type         string `json:"type"`
 	ResourceID   int    `json:"resource_id"`
@@ -45,16 +45,16 @@ type Region struct {
 }
 
 type SSHKey struct {
-	Id   int    `json:"id"`
+	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 
 const (
-	DEFAULT_REGION = "ams1"
-	API_URL        = "https://api.digitalocean.com/v2/"
+	DefaultRegion = "ams1"
+	APIURL        = "https://api.digitalocean.com/v2/"
 )
 
-func newApiRequest(method, url string, body io.Reader) (*http.Request, error) {
+func newAPIRequest(method, url string, body io.Reader) (*http.Request, error) {
 	request, err := http.NewRequest(method, url, body)
 	if err != nil {
 		return request, err
@@ -63,21 +63,21 @@ func newApiRequest(method, url string, body io.Reader) (*http.Request, error) {
 	return request, nil
 }
 
-func doApiGet(url string, respData interface{}) error {
-	return doApiRequest("GET", url, nil, respData)
+func doAPIGet(url string, respData interface{}) error {
+	return doAPIRequest("GET", url, nil, respData)
 }
 
-func doApiPost(url string, reqData, respData interface{}) error {
-	return doApiRequest("POST", url, reqData, respData)
+func doAPIPost(url string, reqData, respData interface{}) error {
+	return doAPIRequest("POST", url, reqData, respData)
 }
 
-func doApiDelete(url string) error {
-	return doApiRequest("DELETE", url, nil, nil)
+func doAPIDelete(url string) error {
+	return doAPIRequest("DELETE", url, nil, nil)
 }
 
-func doApiRequest(method, url string, reqData, respData interface{}) error {
+func doAPIRequest(method, url string, reqData, respData interface{}) error {
 	b := new(bytes.Buffer)
-	request, err := newApiRequest(method, url, b)
+	request, err := newAPIRequest(method, url, b)
 	if err != nil {
 		return err
 	}
@@ -127,7 +127,7 @@ func getSSHKeys() ([]SSHKey, error) {
 	var list struct {
 		SSHKeys []SSHKey `json:"ssh_keys"`
 	}
-	err := doApiGet(API_URL+"account/keys", &list)
+	err := doAPIGet(APIURL+"account/keys", &list)
 	if err != nil {
 		return nil, err
 	}
@@ -141,7 +141,7 @@ func SSHKeyByName(name string) (int, error) {
 	}
 	for _, k := range keys {
 		if k.Name == name {
-			return k.Id, nil
+			return k.ID, nil
 		}
 	}
 	return -1, fmt.Errorf("No key with name %s available", name)

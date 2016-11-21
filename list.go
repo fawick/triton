@@ -74,13 +74,13 @@ func listSSHKeys(c *cli.Context) {
 		return
 	}
 	if len(keys) == 0 {
-		fmt.Println("\nNo Keys available\n")
+		fmt.Print("\nNo Keys available\n\n")
 		return
 	}
-	fmt.Println("\nAvailable SSH Keys\n")
+	fmt.Print("\nAvailable SSH Keys\n\n")
 	tab.Header("ID", "Name")
 	for _, k := range keys {
-		tab.Line(k.Id, k.Name)
+		tab.Line(k.ID, k.Name)
 	}
 	tab.Flush()
 	fmt.Println()
@@ -102,15 +102,15 @@ func listImages(c *cli.Context) {
 		images = l
 	}
 	if len(images) == 0 {
-		fmt.Println("\nNo Images available\n")
+		fmt.Print("\nNo Images available\n\n")
 		return
 	}
-	fmt.Println("\nAvailable Images\n")
+	fmt.Print("\nAvailable Images\n\n")
 	tab.Header("ID", "Name", "Creation", "Regions")
 	for _, i := range images {
 		t, _ := time.Parse(time.RFC3339, i.CreatedAt)
 		s := t.Format(time.RFC822)
-		tab.Line(i.Id, i.Name, s, i.Regions)
+		tab.Line(i.ID, i.Name, s, i.Regions)
 	}
 	tab.Flush()
 	fmt.Println()
@@ -125,13 +125,13 @@ func listDroplets(c *cli.Context) {
 		return
 	}
 	if len(droplets) == 0 {
-		fmt.Println("\nNo Droplets available\n")
+		fmt.Print("\nNo Droplets available\n\n")
 		return
 	}
-	fmt.Println("\nAvailable Droplets\n")
+	fmt.Print("\nAvailable Droplets\n\n")
 	tab.Header("ID", "Name", "Region", "Status", "IP Address")
 	for _, d := range droplets {
-		tab.Line(d.Id, d.Name, d.Region.Name, d.Status,
+		tab.Line(d.ID, d.Name, d.Region.Name, d.Status,
 			d.Networks.IPv4[0].Address)
 	}
 	tab.Flush()
