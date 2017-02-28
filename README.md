@@ -1,3 +1,7 @@
+# It's 2017!
+
+This tool is deprecated. Use github.com/digitalocean/doctl instead.
+
 # triton
 
 According to [Wikipedia](http://en.wikipedia.org/wiki/Triton_%28mythology%29),
