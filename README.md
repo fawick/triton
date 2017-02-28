@@ -1,6 +1,6 @@
 # It's 2017!
 
-This tool is deprecated. Use github.com/digitalocean/doctl instead.
+This tool is deprecated. Use https://github.com/digitalocean/doctl instead.
 
 # triton
 
